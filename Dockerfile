@@ -24,3 +24,9 @@ ENV ASPNETCORE_URLS=http://0.0.0.0:8000
 
 # Altere para o nome correto gerado no publish (geralmente em minúsculas)
 ENTRYPOINT ["dotnet", "cloud-application.dll"]
+<<<<<<< Updated upstream
+=======
+
+
+
+>>>>>>> Stashed changes
