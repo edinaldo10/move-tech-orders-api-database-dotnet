@@ -2,14 +2,10 @@
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
-# Copia o arquivo de projeto e restaura dependências
 COPY ["cloud-application.csproj", "./"]
 RUN dotnet restore
 
-# Copia todo o restante do código fonte
 COPY . .
-
-# Publica a aplicação
 RUN dotnet publish "cloud-application.csproj" -c Release -o /app/publish
 
 # Estágio Final / Runtime
