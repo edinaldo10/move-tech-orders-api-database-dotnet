@@ -5,6 +5,9 @@ using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Adiciona o suporte ao OpenAPI nativo do .NET (necessário para o Scalar)
+builder.Services.AddOpenApi();
+
 // Captura a string de conexão priorizando a variável de ambiente DATABASE_URL
 var databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
 var connectionString = databaseUrl ?? builder.Configuration.GetConnectionString("DefaultConnection") ?? "Data Source=orders.db";
@@ -51,6 +54,9 @@ using (var scope = app.Services.CreateScope())
         // Ignora caso outra réplica já esteja criando as tabelas simultaneamente
     }
 }
+
+// Habilita o endpoint do OpenAPI nativo
+app.MapOpenApi();
 
 app.MapGet("/docs", () => Results.Redirect("/scalar/v1"))
    .ExcludeFromDescription();
