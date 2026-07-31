@@ -4,3 +4,5 @@ obj/
 .env
 *.db
 *.db-journal
+appsettings.Development.json
+appsettings.Production.json
