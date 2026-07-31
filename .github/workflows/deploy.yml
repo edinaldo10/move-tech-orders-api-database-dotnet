@@ -39,7 +39,7 @@ jobs:
     - name: Build e push da imagem
       run: |
         IMAGE=${{ env.REGISTRY }}/${{ secrets.MGC_REGISTRY_NAME }}/${{ env.IMAGE_NAME }}:latest
-        docker build -t $IMAGE .
+        docker build --no-cache -t $IMAGE .
         docker push $IMAGE
 
     - name: Configurar Kubeconfig
