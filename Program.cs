@@ -124,3 +124,6 @@ app.Run();
 
 record OrderCreateDto(string Customer);
 record ItemCreateDto(string Sku, string Description, int Quantity);
+
+// NECESSÁRIO PARA O WEBAPPLICATIONFACTORY DOS TESTES FUNCIONAREM:
+public partial class Program { }
