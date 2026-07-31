@@ -38,10 +38,18 @@ builder.Services.AddEndpointsApiExplorer();
 
 var app = builder.Build();
 
+// Bloco protegido para evitar conflitos de concorrência com múltiplas réplicas no Kubernetes
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    db.Database.EnsureCreated();
+    try
+    {
+        db.Database.EnsureCreated();
+    }
+    catch
+    {
+        // Ignora caso outra réplica já esteja criando as tabelas simultaneamente
+    }
 }
 
 app.MapGet("/docs", () => Results.Redirect("/scalar/v1"))
@@ -52,7 +60,7 @@ app.MapScalarApiReference(options =>
     options.Title = "API de Pedidos (.NET)";
 });
 
-// Endpoint de health corrigido para retornar 503 caso o banco falhe (ideal para o Kubernetes)
+// Endpoint de health retornando 503 caso o banco falhe
 app.MapGet("/health", async (AppDbContext db) =>
 {
     try
