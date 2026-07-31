@@ -5,7 +5,25 @@ using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? "Data Source=orders.db";
+// Captura a string de conexão priorizando a variável de ambiente DATABASE_URL
+var databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
+var connectionString = databaseUrl ?? builder.Configuration.GetConnectionString("DefaultConnection") ?? "Data Source=orders.db";
+
+// Ajuste caso a DATABASE_URL venha no formato URI (ex: postgresql://user:pass@host:port/db)
+if (!string.IsNullOrEmpty(databaseUrl) && databaseUrl.StartsWith("postgres"))
+{
+    try
+    {
+        var uri = new Uri(databaseUrl);
+        var userInfo = uri.UserInfo.Split(':');
+        connectionString = $"Host={uri.Host};Port={uri.Port};Database={uri.AbsolutePath.TrimStart('/')};Username={userInfo[0]};Password={userInfo[1]}";
+    }
+    catch
+    {
+        // Se falhar o parse da URI, tenta usar a string diretamente
+        connectionString = databaseUrl;
+    }
+}
 
 if (connectionString.Contains("Host="))
 {
