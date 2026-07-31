@@ -6,10 +6,8 @@ WORKDIR /src
 COPY ["cloud-application.csproj", "./"]
 RUN dotnet restore
 
-# Copia apenas os arquivos necessários da API (ignorando a pasta tests/)
-COPY Program.cs ./
-COPY Data/ ./Data/
-COPY Models/ ./Models/
+# Copia todo o restante do código fonte
+COPY . .
 
 # Publica a aplicação
 RUN dotnet publish "cloud-application.csproj" -c Release -o /app/publish
@@ -22,11 +20,4 @@ COPY --from=build /app/publish .
 EXPOSE 8000
 ENV ASPNETCORE_URLS=http://0.0.0.0:8000
 
-# Altere para o nome correto gerado no publish (geralmente em minúsculas)
 ENTRYPOINT ["dotnet", "cloud-application.dll"]
-<<<<<<< Updated upstream
-=======
-
-
-
->>>>>>> Stashed changes
