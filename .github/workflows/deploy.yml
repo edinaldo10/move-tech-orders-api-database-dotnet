@@ -58,4 +58,5 @@ jobs:
       run: |
         export MGC_REGISTRY_NAME=${{ secrets.MGC_REGISTRY_NAME }}
         envsubst < k8s/app.yaml | kubectl apply -n default -f -
+        kubectl rollout restart deployment/cloud-application -n default
         kubectl rollout status deployment/cloud-application -n default
