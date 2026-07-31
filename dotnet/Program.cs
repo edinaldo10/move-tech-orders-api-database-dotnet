@@ -9,14 +9,14 @@ var builder = WebApplication.CreateBuilder(args);
 var databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
 var connectionString = databaseUrl ?? builder.Configuration.GetConnectionString("DefaultConnection") ?? "Data Source=orders.db";
 
-// Ajuste caso a DATABASE_URL venha no formato URI (ex: postgresql://user:pass@host:port/db)
-if (!string.IsNullOrEmpty(databaseUrl) && databaseUrl.StartsWith("postgres"))
+// Ajuste para aceitar tanto "postgres://" quanto "postgresql://" de forma robusta
+if (!string.IsNullOrEmpty(databaseUrl) && (databaseUrl.StartsWith("postgres://") || databaseUrl.StartsWith("postgresql://")))
 {
     try
     {
         var uri = new Uri(databaseUrl);
         var userInfo = uri.UserInfo.Split(':');
-        connectionString = $"Host={uri.Host};Port={uri.Port};Database={uri.AbsolutePath.TrimStart('/')};Username={userInfo[0]};Password={userInfo[1]}";
+        connectionString = $"Host={uri.Host};Port={uri.Port};Database={uri.AbsolutePath.TrimStart('/')};Username={userInfo[0]};Password={userInfo[1]};SSL Mode=Prefer;Trust Server Certificate=true";
     }
     catch
     {
@@ -25,7 +25,7 @@ if (!string.IsNullOrEmpty(databaseUrl) && databaseUrl.StartsWith("postgres"))
     }
 }
 
-if (connectionString.Contains("Host="))
+if (connectionString.Contains("Host=") || connectionString.Contains("Server="))
 {
     builder.Services.AddDbContext<AppDbContext>(options => options.UseNpgsql(connectionString));
 }
