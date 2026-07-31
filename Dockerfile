@@ -22,4 +22,5 @@ COPY --from=build /app/publish .
 EXPOSE 8000
 ENV ASPNETCORE_URLS=http://0.0.0.0:8000
 
-ENTRYPOINT ["dotnet", "CloudApplication.dll"]
+# Altere para o nome correto gerado no publish (geralmente em minúsculas)
+ENTRYPOINT ["dotnet", "cloud-application.dll"]
