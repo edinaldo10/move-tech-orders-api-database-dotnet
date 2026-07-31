@@ -12,7 +12,7 @@
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.0" />
     <PackageReference Include="Scalar.AspNetCore" Version="1.2.0" />
     
-    <!-- Adicione estas linhas abaixo -->
+    <!-- Adicione estas linhas para incluir as dependências de teste -->
     <PackageReference Include="xunit" Version="2.9.2" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="8.0.10" />
