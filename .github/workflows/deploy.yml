@@ -6,6 +6,7 @@ on:
 env:
   REGISTRY: container-registry.br-se1.magalu.cloud
   IMAGE_NAME: cloud-application-dotnet
+  REGISTRY_USER_NAME: ${{ secrets.MGC_REGISTRY_NAME }}
 
 jobs:
   test:
@@ -41,21 +42,18 @@ jobs:
         docker build -t $IMAGE .
         docker push $IMAGE
 
-    # 1. Configurar o acesso ao cluster da turma usando a secret MGC_KUBECONFIG
     - name: Configurar Kubeconfig
       run: |
         mkdir -p ~/.kube
         echo "${{ secrets.MGC_KUBECONFIG }}" > ~/.kube/config
         chmod 600 ~/.kube/config
 
-    # 2. Criar o Secret do Banco de Dados no namespace correto
     - name: Create Kubernetes Secret
       run: |
         kubectl create secret generic db-secret \
         --from-literal=url='${{ secrets.DATABASE_URL }}' \
         --dry-run=client -o yaml | kubectl apply -n default -f -
 
-    # 3. Aplicar o deploy injetando a variável de ambiente do Registry
     - name: Deploy no Kubernetes
       run: |
         export MGC_REGISTRY_NAME=${{ secrets.MGC_REGISTRY_NAME }}
