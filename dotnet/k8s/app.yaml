@@ -14,9 +14,12 @@ spec:
       labels:
         app: cloud-application
     spec:
+      imagePullSecrets:
+      - name: registry-secret
       containers:
       - name: cloud-application
         image: container-registry.br-se1.magalu.cloud/${MGC_REGISTRY_NAME}/cloud-application-dotnet:latest
+        imagePullPolicy: Always
         ports:
         - containerPort: 8000
         env:
