@@ -41,13 +41,23 @@ jobs:
         docker build -t $IMAGE .
         docker push $IMAGE
 
-    - name: Configurar kubectl
+    # 1. Configurar o acesso ao cluster da turma usando a secret MGC_KUBECONFIG
+    - name: Configurar Kubeconfig
       run: |
-        echo "${{ secrets.MGC_KUBECONFIG }}" > kubeconfig.yaml
+        mkdir -p ~/.kube
+        echo "${{ secrets.MGC_KUBECONFIG }}" > ~/.kube/config
+        chmod 600 ~/.kube/config
 
+    # 2. Criar o Secret do Banco de Dados no namespace correto
+    - name: Create Kubernetes Secret
+      run: |
+        kubectl create secret generic db-secret \
+        --from-literal=url='${{ secrets.DATABASE_URL }}' \
+        --dry-run=client -o yaml | kubectl apply -n default -f -
+
+    # 3. Aplicar o deploy injetando a variável de ambiente do Registry
     - name: Deploy no Kubernetes
       run: |
-        export KUBECONFIG=kubeconfig.yaml
         export MGC_REGISTRY_NAME=${{ secrets.MGC_REGISTRY_NAME }}
-        envsubst < k8s/app.yaml | kubectl apply -f -
-        kubectl rollout status deployment/cloud-application
+        envsubst < k8s/app.yaml | kubectl apply -n default -f -
+        kubectl rollout status deployment/cloud-application -n default
