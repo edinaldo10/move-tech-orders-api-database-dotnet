@@ -52,16 +52,21 @@ app.MapScalarApiReference(options =>
     options.Title = "API de Pedidos (.NET)";
 });
 
+// Endpoint de health corrigido para retornar 503 caso o banco falhe (ideal para o Kubernetes)
 app.MapGet("/health", async (AppDbContext db) =>
 {
     try
     {
-        await db.Database.CanConnectAsync();
-        return Results.Ok(new { status = "ok", database = "ok" });
+        var canConnect = await db.Database.CanConnectAsync();
+        if (canConnect)
+        {
+            return Results.Ok(new { status = "ok", database = "ok" });
+        }
+        return Results.StatusCode(503);
     }
     catch
     {
-        return Results.Ok(new { status = "degraded", database = "unavailable" });
+        return Results.StatusCode(503);
     }
 }).WithTags("health");
 
