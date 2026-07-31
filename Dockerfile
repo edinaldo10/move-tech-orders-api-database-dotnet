@@ -16,4 +16,5 @@ COPY --from=build /app/publish .
 EXPOSE 8000
 ENV ASPNETCORE_URLS=http://0.0.0.0:8000
 
+# ATENÇÃO: O nome da DLL gerada é em minúsculas para corresponder ao csproj
 ENTRYPOINT ["dotnet", "cloud-application.dll"]
