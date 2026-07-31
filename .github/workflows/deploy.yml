@@ -5,8 +5,8 @@ on:
 
 env:
   REGISTRY: container-registry.br-se1.magalu.cloud
-  IMAGE_NAME: cloud-application
-  DOTNET_VERSION: '8.0' # Altere para a versão do .NET desejada (ex: 6.0, 7.0, 8.0, 9.0)
+  IMAGE_NAME: cloud-application-dotnet
+  DOTNET_VERSION: '8.0'
 
 jobs:
   test:
