@@ -1,21 +1,21 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: Cloud-application
+  name: cloud-application
   labels:
-    app: Cloud-application
+    app: cloud-application
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: Cloud-application
+      app: cloud-application
   template:
     metadata:
       labels:
-        app: Cloud-application
+        app: cloud-application
     spec:
       containers:
-      - name: Cloud-application
+      - name: cloud-application
         image: container-registry.br-se1.magalu.cloud/${MGC_REGISTRY_NAME}/cloud-application-dotnet:latest
         ports:
         - containerPort: 8000
@@ -41,10 +41,10 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: Cloud-application
+  name: cloud-application
 spec:
   selector:
-    app: Cloud-application
+    app: cloud-application
   type: LoadBalancer
   ports:
   - port: 8000
