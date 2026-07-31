@@ -1,0 +1,53 @@
+name: Deploy .NET
+
+on:
+  workflow_dispatch:
+
+env:
+  REGISTRY: container-registry.br-se1.magalu.cloud
+  IMAGE_NAME: cloud-application-dotnet
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+
+    - name: Restaurar dependências
+      run: dotnet restore
+
+    - name: Executar testes
+      run: dotnet test --no-restore --verbosity normal
+
+  build-and-deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Login no Container Registry
+      run: |
+        docker login https://${{ env.REGISTRY }} \
+          -u ${{ secrets.MGC_REGISTRY_USER }} \
+          -p ${{ secrets.MGC_REGISTRY_PASSWORD }}
+
+    - name: Build e push da imagem
+      run: |
+        IMAGE=${{ env.REGISTRY }}/${{ secrets.MGC_REGISTRY_NAME }}/${{ env.IMAGE_NAME }}:latest
+        docker build -t $IMAGE .
+        docker push $IMAGE
+
+    - name: Configurar kubectl
+      run: |
+        echo "${{ secrets.MGC_KUBECONFIG }}" > kubeconfig.yaml
+
+    - name: Deploy no Kubernetes
+      run: |
+        export KUBECONFIG=kubeconfig.yaml
+        export MGC_REGISTRY_NAME=${{ secrets.MGC_REGISTRY_NAME }}
+        envsubst < k8s/app.yaml | kubectl apply -f -
+        kubectl rollout status deployment/cloud-application
