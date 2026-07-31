@@ -1,12 +1,12 @@
-name: Deploy .NET
+name: Deploy
 
 on:
   workflow_dispatch:
 
 env:
   REGISTRY: container-registry.br-se1.magalu.cloud
-  IMAGE_NAME: cloud-application-dotnet
-  REGISTRY_USER_NAME: ${{ secrets.MGC_REGISTRY_NAME }}
+  IMAGE_NAME: cloud-application
+  DOTNET_VERSION: '8.0' # Altere para a versão do .NET desejada (ex: 6.0, 7.0, 8.0, 9.0)
 
 jobs:
   test:
@@ -14,16 +14,20 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    - uses: actions/setup-dotnet@v4
+    - name: Configurar .NET
+      uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: '8.0.x'
+        dotnet-version: ${{ env.DOTNET_VERSION }}
 
     - name: Restaurar dependências
       run: dotnet restore
 
-    - name: Executar testes isolados
-      run: dotnet test tests/cloud-application-tests.csproj --no-restore --verbosity normal
-      
+    - name: Compilar projeto
+      run: dotnet build --no-restore --configuration Release
+
+    - name: Executar testes
+      run: dotnet test --no-build --configuration Release --verbosity normal
+
   build-and-deploy:
     needs: test
     runs-on: ubuntu-latest
@@ -38,25 +42,35 @@ jobs:
 
     - name: Build e push da imagem
       run: |
-        IMAGE=${{ env.REGISTRY }}/${{ secrets.MGC_REGISTRY_NAME }}/${{ env.IMAGE_NAME }}:latest
-        docker build --no-cache -t $IMAGE .
-        docker push $IMAGE
+        BASE=${{ env.REGISTRY }}/${{ secrets.MGC_REGISTRY_NAME }}/${{ env.IMAGE_NAME }}
+        docker build -t $BASE:${{ github.sha }} -t $BASE:latest .
+        docker push $BASE:${{ github.sha }}
+        docker push $BASE:latest
 
-    - name: Configurar Kubeconfig
+    - name: Configurar kubectl
       run: |
-        mkdir -p ~/.kube
-        echo "${{ secrets.MGC_KUBECONFIG }}" > ~/.kube/config
-        chmod 600 ~/.kube/config
+        echo "${{ secrets.MGC_KUBECONFIG }}" > kubeconfig.yaml
 
-    - name: Create Kubernetes Secret
+    - name: Criar Secret do registry
       run: |
+        export KUBECONFIG=kubeconfig.yaml
+        kubectl create secret docker-registry registry-secret \
+          --docker-server=${{ env.REGISTRY }} \
+          --docker-username=${{ secrets.MGC_REGISTRY_USER }} \
+          --docker-password=${{ secrets.MGC_REGISTRY_PASSWORD }} \
+          --dry-run=client -o yaml | kubectl apply -n default -f -
+
+    - name: Criar Secret do banco
+      run: |
+        export KUBECONFIG=kubeconfig.yaml
         kubectl create secret generic db-secret \
-        --from-literal=url='${{ secrets.DATABASE_URL }}' \
-        --dry-run=client -o yaml | kubectl apply -n default -f -
+          --from-literal=url=${{ secrets.DATABASE_URL }} \
+          --dry-run=client -o yaml | kubectl apply -n default -f -
 
     - name: Deploy no Kubernetes
       run: |
+        export KUBECONFIG=kubeconfig.yaml
         export MGC_REGISTRY_NAME=${{ secrets.MGC_REGISTRY_NAME }}
-        envsubst < k8s/app.yaml | kubectl apply -n default -f -
-        kubectl rollout restart deployment/cloud-application -n default
-        kubectl rollout status deployment/cloud-application -n default
+        export IMAGE_TAG=${{ github.sha }}
+        envsubst < k8s/app.yaml | kubectl apply -f -
+        kubectl rollout status deployment/cloud-application
