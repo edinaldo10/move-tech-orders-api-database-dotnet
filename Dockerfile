@@ -2,10 +2,13 @@
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
-COPY ["dotnet/CloudApplication.csproj", "./"]
+# Como o contexto apontado no workflow é a pasta dotnet, 
+# o csproj está na raiz do contexto (./CloudApplication.csproj)
+COPY ["CloudApplication.csproj", "./"]
 RUN dotnet restore "CloudApplication.csproj"
 
-COPY dotnet/ .
+# Copia o restante dos arquivos da aplicação
+COPY . .
 RUN dotnet publish "CloudApplication.csproj" -c Release -o /app/publish
 
 # Estágio Final / Runtime
