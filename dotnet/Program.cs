@@ -52,7 +52,6 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
-
 app.MapGet("/docs", () => Results.Redirect("/scalar/v1"))
    .ExcludeFromDescription();
 
