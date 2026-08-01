@@ -7,38 +7,35 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Captura a string de conexão priorizando a variável de ambiente DATABASE_URL
 var databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
-var connectionString = databaseUrl ?? builder.Configuration.GetConnectionString("DefaultConnection") ?? "Data Source=orders.db";
+var connectionString = databaseUrl ?? builder.Configuration.GetConnectionString("DefaultConnection");
 
-// Ajuste para aceitar tanto "postgres://" quanto "postgresql://" de forma robusta
+// Ajuste robusto para aceitar URLs do PostgreSQL (ex: postgres://user:pass@host:port/db)
 if (!string.IsNullOrEmpty(databaseUrl) && (databaseUrl.StartsWith("postgres://") || databaseUrl.StartsWith("postgresql://")))
 {
     try
     {
         var uri = new Uri(databaseUrl);
         var userInfo = uri.UserInfo.Split(':');
-        connectionString = $"Host={uri.Host};Port={uri.Port};Database={uri.AbsolutePath.TrimStart('/')};Username={userInfo[0]};Password={userInfo[1]};SSL Mode=Prefer;Trust Server Certificate=true";
+        var user = userInfo.Length > 0 ? Uri.UnescapeDataString(userInfo[0]) : string.Empty;
+        var pass = userInfo.Length > 1 ? Uri.UnescapeDataString(userInfo[1]) : string.Empty;
+        var port = uri.Port > 0 ? uri.Port : 5432;
+
+        connectionString = $"Host={uri.Host};Port={port};Database={uri.AbsolutePath.TrimStart('/')};Username={user};Password={pass};SSL Mode=Prefer;Trust Server Certificate=true";
     }
     catch
     {
-        // Se falhar o parse da URI, tenta usar a string diretamente
         connectionString = databaseUrl;
     }
 }
 
-if (connectionString.Contains("Host=") || connectionString.Contains("Server="))
-{
-    builder.Services.AddDbContext<AppDbContext>(options => options.UseNpgsql(connectionString));
-}
-else
-{
-    builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlite(connectionString));
-}
+// Configuração exclusiva para PostgreSQL
+builder.Services.AddDbContext<AppDbContext>(options => options.UseNpgsql(connectionString));
 
 builder.Services.AddEndpointsApiExplorer();
 
 var app = builder.Build();
 
-// Bloco protegido para evitar conflitos de concorrência com múltiplas réplicas no Kubernetes
+// Bloco protegido para criar o banco/tabelas caso ainda não existam
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
@@ -60,7 +57,7 @@ app.MapScalarApiReference(options =>
     options.Title = "API de Pedidos (.NET)";
 });
 
-// Endpoint de health retornando 503 caso o banco falhe
+// Endpoint de health verificando a conectividade com o PostgreSQL
 app.MapGet("/health", async (AppDbContext db) =>
 {
     try
@@ -137,5 +134,4 @@ app.Run();
 record OrderCreateDto(string Customer);
 record ItemCreateDto(string Sku, string Description, int Quantity);
 
-// NECESSÁRIO PARA O WEBAPPLICATIONFACTORY DOS TESTES FUNCIONAREM:
 public partial class Program { }
