@@ -1,4 +1,3 @@
-using CloudApplication.Models;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.VisualStudio.TestPlatform.TestHost;
 using System.Net;

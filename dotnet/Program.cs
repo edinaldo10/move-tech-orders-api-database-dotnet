@@ -1,18 +1,9 @@
 using CloudApplication.Data;
 using CloudApplication.Models;
 using Microsoft.EntityFrameworkCore;
-
-namespace CloudApplication;
-
-using CloudApplication.Data;
-using CloudApplication.Models;
-using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
-
-// Adiciona o suporte ao OpenAPI nativo do .NET (necessário para o Scalar)
-builder.Services.AddOpenApi();
 
 // Captura a string de conexão priorizando a variável de ambiente DATABASE_URL
 var databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
@@ -24,14 +15,14 @@ if (!string.IsNullOrEmpty(databaseUrl) && (databaseUrl.StartsWith("postgres://")
     try
     {
         var uri = new Uri(databaseUrl);
-var userInfo = uri.UserInfo.Split(':');
-connectionString = $"Host={uri.Host};Port={uri.Port};Database={uri.AbsolutePath.TrimStart('/')};Username={userInfo[0]};Password={userInfo[1]};SSL Mode=Prefer;Trust Server Certificate=true";
+        var userInfo = uri.UserInfo.Split(':');
+        connectionString = $"Host={uri.Host};Port={uri.Port};Database={uri.AbsolutePath.TrimStart('/')};Username={userInfo[0]};Password={userInfo[1]};SSL Mode=Prefer;Trust Server Certificate=true";
     }
     catch
     {
-    // Se falhar o parse da URI, tenta usar a string diretamente
-    connectionString = databaseUrl;
-}
+        // Se falhar o parse da URI, tenta usar a string diretamente
+        connectionString = databaseUrl;
+    }
 }
 
 if (connectionString.Contains("Host=") || connectionString.Contains("Server="))
@@ -61,8 +52,6 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
-// Habilita o endpoint do OpenAPI nativo
-app.MapOpenApi();
 
 app.MapGet("/docs", () => Results.Redirect("/scalar/v1"))
    .ExcludeFromDescription();
