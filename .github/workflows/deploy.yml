@@ -65,16 +65,12 @@ jobs:
         export KUBECONFIG=kubeconfig.yaml
         kubectl create secret docker-registry registry-secret --docker-server=${{ env.REGISTRY }} --docker-username=${{ secrets.MGC_REGISTRY_USER }} --docker-password=${{ secrets.MGC_REGISTRY_PASSWORD }} --dry-run=client -o yaml | kubectl apply -n default -f -
 
-    - name: Criar Secret do banco
-      run: |
-        export KUBECONFIG=kubeconfig.yaml
-        kubectl create secret generic db-secret \
-          --from-literal=url=${{ secrets.DATABASE_URL }} \
-          --dry-run=client -o yaml | kubectl apply -n default -f -
-
     - name: Deploy no Kubernetes
       run: |
         export KUBECONFIG=kubeconfig.yaml
-        export MGC_REGISTRY_NAME=${{ secrets.MGC_REGISTRY_NAME }}
-        envsubst < k8s/app.yaml | kubectl apply -n default -f -
-        kubectl rollout status deployment/cloud-application
+        export MGC_REGISTRY_NAME="${{ secrets.MGC_REGISTRY_NAME }}"
+        export IMAGE_TAG="${{ github.sha }}"
+        envsubst '$MGC_REGISTRY_NAME $IMAGE_TAG' < k8s/app.yaml | kubectl apply -n default -f -
+        kubectl rollout status deployment/cloud-application -n default
+
+    
