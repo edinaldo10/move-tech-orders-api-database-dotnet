@@ -48,26 +48,27 @@ builder.Services.AddEndpointsApiExplorer();
 
 var app = builder.Build();
 
-// Bloco protegido para criar o banco/tabelas caso ainda não existam
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     try
     {
-        // Se estiver usando SQLite em memória, a conexão precisa estar aberta antes do EnsureCreated
-        if (db.Database.IsSqlite() && db.Database.GetDbConnection().State != System.Data.ConnectionState.Open)
+        if (db.Database.IsSqlite())
         {
-            db.Database.OpenConnection();
+            var connection = db.Database.GetDbConnection();
+            if (connection.State != System.Data.ConnectionState.Open)
+            {
+                connection.Open();
+            }
         }
 
         db.Database.EnsureCreated();
     }
     catch
     {
-        // Ignora caso outra réplica já esteja criando as tabelas simultaneamente
+        // Ignora concorrência de criação
     }
 }
-
 app.MapGet("/docs", () => Results.Redirect("/scalar/v1"))
    .ExcludeFromDescription();
 
