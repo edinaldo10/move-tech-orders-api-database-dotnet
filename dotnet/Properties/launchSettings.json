@@ -1,6 +1,6 @@
 {
   "profiles": {
-    "Cloud-application": {
+    "CloudApplication": {
       "commandName": "Project",
       "launchBrowser": true,
       "environmentVariables": {

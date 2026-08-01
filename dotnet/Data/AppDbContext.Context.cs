@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
-using cloud_application.Data; // <- Add semicolon here
+using CloudApplication.Data; // <- Add semicolon here
 
-namespace cloud_application.Data;
+namespace CloudApplication.Data;
 
 public class AppDbContext : DbContext
 {
