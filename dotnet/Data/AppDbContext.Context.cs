@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
-using CloudApplication.Data; // <- Add semicolon here
+using CloudApplication.Data;
+using CloudApplication.Models; // <- Add semicolon here
 
 namespace CloudApplication.Data;
 
