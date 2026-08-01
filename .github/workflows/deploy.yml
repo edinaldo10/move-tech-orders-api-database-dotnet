@@ -11,6 +11,23 @@ env:
 jobs:
   test:
     runs-on: ubuntu-latest
+    
+    # Adiciona o serviço do PostgreSQL para os testes conseguirem se conectar
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_DB: orders
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
     - uses: actions/checkout@v4
 
@@ -28,6 +45,8 @@ jobs:
       working-directory: ./dotnet
 
     - name: Restaurar e Executar testes
+      env:
+        DATABASE_URL: Host=localhost;Port=5432;Database=orders;Username=postgres;Password=postgres
       run: dotnet test CloudApplication-tests.csproj --configuration Release --verbosity normal
       working-directory: ./tests
 
