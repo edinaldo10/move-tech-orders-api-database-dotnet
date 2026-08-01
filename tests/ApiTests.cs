@@ -1,14 +1,50 @@
-using Microsoft.AspNetCore.Mvc.Testing;
 using System.Net;
 using System.Net.Http.Json;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Xunit;
+using CloudApplication.Data;
 using CloudApplication.Models;
 
-public class ApiTests : IClassFixture<WebApplicationFactory<Program>>
+public class CustomWebApplicationFactory : WebApplicationFactory<Program>
+{
+    protected override void ConfigureWebHost(IWebHostBuilder builder)
+    {
+        builder.ConfigureServices(services =>
+        {
+            // Remove o registro original do DbContext (Npgsql)
+            var descriptor = services.SingleOrDefault(
+                d => d.ServiceType == typeof(DbContextOptions<AppDbContext>));
+
+            if (descriptor != null)
+            {
+                services.Remove(descriptor);
+            }
+
+            // Adiciona o DbContext configurado com SQLite em memória
+            services.AddDbContext<AppDbContext>(options =>
+            {
+                options.UseSqlite("DataSource=:memory:");
+            });
+
+            // Cria o escopo para inicializar o banco e as tabelas na memória
+            var sp = services.BuildServiceProvider();
+            using var scope = sp.CreateScope();
+            var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            
+            db.Database.OpenConnection();
+            db.Database.EnsureCreated();
+        });
+    }
+}
+
+public class ApiTests : IClassFixture<CustomWebApplicationFactory>
 {
     private readonly HttpClient _client;
 
-    public ApiTests(WebApplicationFactory<Program> factory)
+    public ApiTests(CustomWebApplicationFactory factory)
     {
         _client = factory.CreateClient();
     }
