@@ -1,7 +1,11 @@
+using CloudApplication.Data;
+using CloudApplication.Models;
+using Microsoft.EntityFrameworkCore;
+
 namespace CloudApplication;
 
-using CloudApplication.Models;
 using CloudApplication.Data;
+using CloudApplication.Models;
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
 
@@ -20,14 +24,14 @@ if (!string.IsNullOrEmpty(databaseUrl) && (databaseUrl.StartsWith("postgres://")
     try
     {
         var uri = new Uri(databaseUrl);
-        var userInfo = uri.UserInfo.Split(':');
-        connectionString = $"Host={uri.Host};Port={uri.Port};Database={uri.AbsolutePath.TrimStart('/')};Username={userInfo[0]};Password={userInfo[1]};SSL Mode=Prefer;Trust Server Certificate=true";
+var userInfo = uri.UserInfo.Split(':');
+connectionString = $"Host={uri.Host};Port={uri.Port};Database={uri.AbsolutePath.TrimStart('/')};Username={userInfo[0]};Password={userInfo[1]};SSL Mode=Prefer;Trust Server Certificate=true";
     }
     catch
     {
-        // Se falhar o parse da URI, tenta usar a string diretamente
-        connectionString = databaseUrl;
-    }
+    // Se falhar o parse da URI, tenta usar a string diretamente
+    connectionString = databaseUrl;
+}
 }
 
 if (connectionString.Contains("Host=") || connectionString.Contains("Server="))
