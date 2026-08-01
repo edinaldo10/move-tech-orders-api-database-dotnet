@@ -46,8 +46,13 @@ jobs:
 
     - name: Build e push da imagem
       run: |
-        BASE=${{ env.REGISTRY }}/${{ secrets.MGC_REGISTRY_NAME }}/${{ env.IMAGE_NAME }}
-        docker build -t $BASE:${{ github.sha }} -t $BASE:latest .
+        REGISTRY_NAME="${{ secrets.MGC_REGISTRY_NAME }}"
+        if [ -z "$REGISTRY_NAME" ]; then
+          echo "Erro: O secret MGC_REGISTRY_NAME nao esta definido ou esta vazio!"
+          exit 1
+        fi
+        BASE="${{ env.REGISTRY }}/$REGISTRY_NAME/${{ env.IMAGE_NAME }}"
+        docker build --no-cache -t $BASE:${{ github.sha }} -t $BASE:latest -f dotnet/Dockerfile dotnet
         docker push $BASE:${{ github.sha }}
         docker push $BASE:latest
 
