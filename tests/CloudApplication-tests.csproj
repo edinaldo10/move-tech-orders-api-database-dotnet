@@ -15,7 +15,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<!-- Referência corrigida para corresponder ao nome real do arquivo principal -->
-		<ProjectReference Include="../dotnet/CloudApplication.csproj" />
-	</ItemGroup>/
+		<ProjectReference Include="..\dotnet\CloudApplication.csproj" />
+	</ItemGroup>
 </Project>
