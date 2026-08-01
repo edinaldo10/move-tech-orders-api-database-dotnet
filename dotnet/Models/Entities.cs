@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
+using CloudApplication.Models;
+using CloudApplication.Data;
 
-namespace CloudApplication.Data;
 namespace CloudApplication.Models;
 
 public class Order
