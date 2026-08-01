@@ -1,5 +1,7 @@
 namespace cloud_application;
 
+using cloud_application.Models;
+using cloud_application.Data;
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
 
