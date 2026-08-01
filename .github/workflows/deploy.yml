@@ -28,7 +28,7 @@ jobs:
       working-directory: ./dotnet
 
     - name: Executar testes
-      run: dotnet test tests/cloud-application-tests.csproj --no-build --configuration Release --verbosity normal
+      run: dotnet test tests/CloudApplication-tests.csproj --no-build --configuration Release --verbosity normal
       working-directory: ./dotnet
 
   build-and-deploy:
@@ -46,7 +46,7 @@ jobs:
     - name: Build e push da imagem
       run: |
         BASE=${{ env.REGISTRY }}/${{ secrets.MGC_REGISTRY_NAME }}/${{ env.IMAGE_NAME }}
-        docker build --no-cache -t $BASE:${{ github.sha }} -t $BASE:latest -f Dockerfile .
+        docker build --no-cache -t $BASE:${{ github.sha }} -t $BASE:latest -f dotnet/Dockerfile dotnet
         docker push $BASE:${{ github.sha }}
         docker push $BASE:latest
 
