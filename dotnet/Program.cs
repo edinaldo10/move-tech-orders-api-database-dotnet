@@ -5,9 +5,11 @@ using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Captura a string de conexão priorizando a variável de ambiente DATABASE_URL
+// Captura a string de conexão priorizando a variável de ambiente, depois a config, e por fim um padrão para testes
 var databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
-var connectionString = databaseUrl ?? builder.Configuration.GetConnectionString("DefaultConnection");
+var connectionString = databaseUrl 
+    ?? builder.Configuration.GetConnectionString("DefaultConnection") 
+    ?? "Host=localhost;Port=5432;Database=orders;Username=postgres;Password=postgres";
 
 // Ajuste robusto para aceitar URLs do PostgreSQL (ex: postgres://user:pass@host:port/db)
 if (!string.IsNullOrEmpty(databaseUrl) && (databaseUrl.StartsWith("postgres://") || databaseUrl.StartsWith("postgresql://")))
