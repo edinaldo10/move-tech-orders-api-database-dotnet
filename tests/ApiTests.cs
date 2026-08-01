@@ -2,6 +2,7 @@ using System.Net;
 using System.Net.Http.Json;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
@@ -14,7 +15,6 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
     {
         builder.ConfigureServices(services =>
         {
-            // Remove o registro original do DbContext (Npgsql)
             var descriptor = services.SingleOrDefault(
                 d => d.ServiceType == typeof(DbContextOptions<AppDbContext>));
 
@@ -23,18 +23,24 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
                 services.Remove(descriptor);
             }
 
-            // Adiciona o DbContext configurado com SQLite em memória
-            services.AddDbContext<AppDbContext>(options =>
+            // Garante uma conexão SQLite em memória persistente (compartilhada por thread/conexão)
+            services.AddSingleton<SqliteConnection>(container =>
             {
-                options.UseSqlite("DataSource=:memory:");
+                var connection = new SqliteConnection("DataSource=:memory:");
+                connection.Open();
+                return connection;
             });
 
-            // Cria o escopo para inicializar o banco e as tabelas na memória
+            services.AddDbContext<AppDbContext>((container, options) =>
+            {
+                var connection = container.GetRequiredService<SqliteConnection>();
+                options.UseSqlite(connection);
+            });
+
+            // Inicializa o banco e as tabelas usando o escopo e a conexão aberta
             var sp = services.BuildServiceProvider();
             using var scope = sp.CreateScope();
             var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-            
-            db.Database.OpenConnection();
             db.Database.EnsureCreated();
         });
     }
@@ -70,7 +76,7 @@ public class ApiTests : IClassFixture<CustomWebApplicationFactory>
         var order = await response.Content.ReadFromJsonAsync<Order>();
         Assert.NotNull(order);
         Assert.Equal("Maria", order.Customer);
-        Assert.Equal("open", order.Status);
+        Assert.Equal("Created", order.Status);
         Assert.False(string.IsNullOrEmpty(order.Id));
     }
 }

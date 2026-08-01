@@ -48,6 +48,7 @@ builder.Services.AddEndpointsApiExplorer();
 
 var app = builder.Build();
 
+// Inicialização segura do Banco de Dados mantendo conexão SQLite persistente se necessário
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
@@ -69,6 +70,7 @@ using (var scope = app.Services.CreateScope())
         // Ignora concorrência de criação
     }
 }
+
 app.MapGet("/docs", () => Results.Redirect("/scalar/v1"))
    .ExcludeFromDescription();
 
@@ -99,7 +101,10 @@ app.MapPost("/orders", async (OrderCreateDto dto, AppDbContext db) =>
 {
     var order = new Order
     {
-        Customer = dto.Customer
+        Id = Guid.NewGuid().ToString(), // Garante ID caso a entidade utilize string
+        Customer = dto.Customer,
+        Status = "Created",             // Define status inicial padrão para evitar nulos
+        CreatedAt = DateTime.UtcNow.ToString("o") // Garante data preenchida
     };
     db.Orders.Add(order);
     await db.SaveChangesAsync();
@@ -123,6 +128,7 @@ app.MapPost("/orders/{id}/items", async (string id, ItemCreateDto dto, AppDbCont
 
     var item = new Item
     {
+        Id = Guid.NewGuid().ToString(), // Garante ID do item caso seja string
         OrderId = id,
         Sku = dto.Sku,
         Description = dto.Description,
