@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
-using cloudApplication.Data;
-using cloudApplication.Models;
+using CloudApplication.Data;
+using CloudApplication.Models;
 using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
