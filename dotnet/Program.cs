@@ -5,7 +5,7 @@ using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Captura a string de conexão priorizando a variável de ambiente, depois a config, e por fim um padrão para testes
+// Captura a string de conexão priorizando a variável de ambiente, depois a config, e por fim um padrão
 var databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
 var connectionString = databaseUrl 
     ?? builder.Configuration.GetConnectionString("DefaultConnection") 
@@ -30,8 +30,19 @@ if (!string.IsNullOrEmpty(databaseUrl) && (databaseUrl.StartsWith("postgres://")
     }
 }
 
-// Configuração exclusiva para PostgreSQL
-builder.Services.AddDbContext<AppDbContext>(options => options.UseNpgsql(connectionString));
+// Configuração dinâmica: Suporta PostgreSQL por padrão ou SQLite caso especificado (útil para testes)
+builder.Services.AddDbContext<AppDbContext>(options =>
+{
+    if (connectionString.Contains("Data Source=", StringComparison.OrdinalIgnoreCase) || 
+        connectionString.Contains("Filename=", StringComparison.OrdinalIgnoreCase))
+    {
+        options.UseSqlite(connectionString);
+    }
+    else
+    {
+        options.UseNpgsql(connectionString);
+    }
+});
 
 builder.Services.AddEndpointsApiExplorer();
 
@@ -43,6 +54,12 @@ using (var scope = app.Services.CreateScope())
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     try
     {
+        // Se estiver usando SQLite em memória, a conexão precisa estar aberta antes do EnsureCreated
+        if (db.Database.IsSqlite() && db.Database.GetDbConnection().State != System.Data.ConnectionState.Open)
+        {
+            db.Database.OpenConnection();
+        }
+
         db.Database.EnsureCreated();
     }
     catch
@@ -59,7 +76,7 @@ app.MapScalarApiReference(options =>
     options.Title = "API de Pedidos (.NET)";
 });
 
-// Endpoint de health verificando a conectividade com o PostgreSQL
+// Endpoint de health verificando a conectividade com o banco
 app.MapGet("/health", async (AppDbContext db) =>
 {
     try
