@@ -20,7 +20,7 @@ jobs:
         dotnet-version: ${{ env.DOTNET_VERSION }}
 
     - name: Restaurar dependências da API
-      run: dotnet restore CloudApplication.csproj
+      run: dotnet restore CloudApplication.csproj # restore-api
       working-directory: ./dotnet
 
     - name: Compilar projeto da API
