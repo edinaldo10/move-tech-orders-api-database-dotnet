@@ -2,11 +2,10 @@
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
-COPY ["dotnet/CloudApplication.csproj", "dotnet/"]
-RUN dotnet restore "dotnet/CloudApplication.csproj"
+COPY ["dotnet/CloudApplication.csproj", "./"]
+RUN dotnet restore "CloudApplication.csproj"
 
-COPY dotnet/ dotnet/
-WORKDIR /src/dotnet
+COPY dotnet/ .
 RUN dotnet publish "CloudApplication.csproj" -c Release -o /app/publish
 
 # Estágio Final / Runtime
