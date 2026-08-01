@@ -1,4 +1,0 @@
-<Solution>
-  <Project Path="../tests/CloudApplication-tests.csproj" />
-  <Project Path="CloudApplication.csproj" />
-</Solution>
