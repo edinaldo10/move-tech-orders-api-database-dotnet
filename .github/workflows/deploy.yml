@@ -63,11 +63,7 @@ jobs:
     - name: Criar Secret do registry
       run: |
         export KUBECONFIG=kubeconfig.yaml
-        kubectl create secret docker-registry registry-secret \
-          --docker-server=${{ env.REGISTRY }} \
-          --docker-username=${{ secrets.MGC_REGISTRY_USER }} \
-          --docker-password=${{ secrets.MGC_REGISTRY_PASSWORD }} \
-          --dry-run=client -o yaml | kubectl apply -n default -f -
+        kubectl create secret docker-registry registry-secret --docker-server=${{ env.REGISTRY }} --docker-username=${{ secrets.MGC_REGISTRY_USER }} --docker-password=${{ secrets.MGC_REGISTRY_PASSWORD }} --dry-run=client -o yaml | kubectl apply -n default -f -
 
     - name: Criar Secret do banco
       run: |
