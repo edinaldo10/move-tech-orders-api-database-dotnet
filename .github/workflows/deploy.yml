@@ -28,7 +28,7 @@ jobs:
       working-directory: ./dotnet
 
     - name: Executar testes
-      run: dotnet test CloudApplication-tests.csproj --no-build --configuration Release --verbosity normal
+      run: dotnet test CloudApplication.sln --no-build --configuration Release --verbosity normal
       working-directory: ./tests
 
   build-and-deploy:
