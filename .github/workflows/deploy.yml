@@ -21,12 +21,15 @@ jobs:
 
     - name: Restaurar dependências
       run: dotnet restore
+      working-directory: ./dotnet
 
     - name: Compilar projeto
       run: dotnet build --no-restore --configuration Release
+      working-directory: ./dotnet
 
     - name: Executar testes
       run: dotnet test --no-build --configuration Release --verbosity normal
+      working-directory: ./dotnet
 
   build-and-deploy:
     needs: test
