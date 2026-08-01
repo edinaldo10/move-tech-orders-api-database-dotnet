@@ -68,9 +68,8 @@ jobs:
     - name: Deploy no Kubernetes
       run: |
         export KUBECONFIG=kubeconfig.yaml
-        export MGC_REGISTRY_NAME="${{ secrets.MGC_REGISTRY_NAME }}"
-        export IMAGE_TAG="${{ github.sha }}"
-        envsubst '$MGC_REGISTRY_NAME $IMAGE_TAG' < ../../k8s/app.yaml | kubectl apply -n default -f -
-        kubectl rollout status deployment/cloud-application -n default
+        export MGC_REGISTRY_NAME=${{ secrets.MGC_REGISTRY_NAME }}
+        envsubst < k8s/app.yaml | kubectl apply -n default -f -
+         kubectl rollout status deployment/cloud-application -n default
 
     
