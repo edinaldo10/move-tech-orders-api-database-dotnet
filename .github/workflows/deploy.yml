@@ -47,7 +47,7 @@ jobs:
     - name: Build e push da imagem
       run: |
         BASE=${{ env.REGISTRY }}/${{ secrets.MGC_REGISTRY_NAME }}/${{ env.IMAGE_NAME }}
-        docker build --no-cache -t $BASE:${{ github.sha }} -t $BASE:latest -f dotnet/Dockerfile dotnet
+        docker build -t $BASE:${{ github.sha }} -t $BASE:latest .
         docker push $BASE:${{ github.sha }}
         docker push $BASE:latest
 
