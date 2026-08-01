@@ -20,16 +20,13 @@ jobs:
         dotnet-version: ${{ env.DOTNET_VERSION }}
 
     - name: Restaurar dependências
-      run: dotnet restore
-      working-directory: ./dotnet
+      run: dotnet restore CloudApplication.sln
 
     - name: Compilar projeto
-      run: dotnet build --no-restore --configuration Release
-      working-directory: ./dotnet
+      run: dotnet build CloudApplication.sln --no-restore --configuration Release
 
     - name: Executar testes
-      run: dotnet test --no-build --configuration Release --verbosity normal
-      working-directory: ./dotnet
+      run: dotnet test tests/cloud-application-tests.csproj --no-build --configuration Release --verbosity normal
 
   build-and-deploy:
     needs: test
@@ -75,5 +72,5 @@ jobs:
         export KUBECONFIG=kubeconfig.yaml
         export MGC_REGISTRY_NAME=${{ secrets.MGC_REGISTRY_NAME }}
         export IMAGE_TAG=${{ github.sha }}
-        envsubst '$MGC_REGISTRY_NAME $IMAGE_TAG' < k8s/app.yaml | kubectl apply -f -
+        envsubst '$MGC_REGISTRY_NAME $IMAGE_TAG' < dotnet/k8s/deployment.yaml | kubectl apply -f -
         kubectl rollout status deployment/cloud-application -n default
