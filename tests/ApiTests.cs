@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using System.Net.Http.Json;
 using System.Net;
 using Xunit;
-using CloudApplication.Models;
+using cloudApplication.Models;
 
 public class ApiTests : IClassFixture<WebApplicationFactory<Program>>
 {

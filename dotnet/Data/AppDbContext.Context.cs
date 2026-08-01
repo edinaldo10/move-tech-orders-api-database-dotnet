@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
-using CloudApplication.Models;
+using cloudApplication.Models;
 
-namespace CloudApplication.Data;
+namespace cloudApplication.Data;
 
 public class AppDbContext : DbContext
 {
