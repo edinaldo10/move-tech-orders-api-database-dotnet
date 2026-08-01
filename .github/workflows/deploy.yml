@@ -70,7 +70,7 @@ jobs:
         export KUBECONFIG=kubeconfig.yaml
         export MGC_REGISTRY_NAME="${{ secrets.MGC_REGISTRY_NAME }}"
         export IMAGE_TAG="${{ github.sha }}"
-        envsubst '$MGC_REGISTRY_NAME $IMAGE_TAG' < k8s/app.yaml | kubectl apply -n default -f -
+        envsubst '$MGC_REGISTRY_NAME $IMAGE_TAG' < dotnet/k8s/app.yaml | kubectl apply -n default -f -
         kubectl rollout status deployment/cloud-application -n default
 
     
