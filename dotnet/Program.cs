@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
-using CloudApplication.Data;
-using CloudApplication.Models;
+using cloud_application.Data; // Ajuste para o namespace exato em minúsculas
+using cloud_application.Models;
 using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
