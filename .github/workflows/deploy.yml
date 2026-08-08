@@ -12,7 +12,6 @@ jobs:
   test:
     runs-on: ubuntu-latest
     
-    # Adiciona o serviço do PostgreSQL para os testes conseguirem se conectar
     services:
       postgres:
         image: postgres:15
@@ -77,12 +76,32 @@ jobs:
 
     - name: Configurar kubectl
       run: |
+        if [ -z "${{ secrets.MGC_KUBECONFIG }}" ]; then
+          echo "Erro: O secret MGC_KUBECONFIG esta vazio!"
+          exit 1
+        fi
         echo "${{ secrets.MGC_KUBECONFIG }}" > kubeconfig.yaml
 
     - name: Criar Secret do registry
       run: |
         export KUBECONFIG=kubeconfig.yaml
-        kubectl create secret docker-registry registry-secret --docker-server=${{ env.REGISTRY }} --docker-username=${{ secrets.MGC_REGISTRY_USER }} --docker-password=${{ secrets.MGC_REGISTRY_PASSWORD }} --dry-run=client -o yaml | kubectl apply -n default -f -
+        kubectl create secret docker-registry registry-secret \
+          --docker-server=${{ env.REGISTRY }} \
+          --docker-username=${{ secrets.MGC_REGISTRY_USER }} \
+          --docker-password=${{ secrets.MGC_REGISTRY_PASSWORD }} \
+          --dry-run=client -o yaml | kubectl apply -n default -f -
+
+    # ETAPA ADICIONADA: Cria/Atualiza o db-secret no cluster automaticamente
+    - name: Criar Secret do Banco de Dados
+      run: |
+        export KUBECONFIG=kubeconfig.yaml
+        if [ -z "${{ secrets.MGC_DATABASE_URL }}" ]; then
+          echo "Erro: O secret MGC_DATABASE_URL nao esta definido no GitHub!"
+          exit 1
+        fi
+        kubectl create secret generic db-secret \
+          --from-literal=url="${{ secrets.MGC_DATABASE_URL }}" \
+          --dry-run=client -o yaml | kubectl apply -n default -f -
 
     - name: Deploy no Kubernetes
       run: |

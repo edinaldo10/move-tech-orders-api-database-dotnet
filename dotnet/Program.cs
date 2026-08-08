@@ -28,25 +28,15 @@ if (!string.IsNullOrEmpty(databaseUrl) && (databaseUrl.StartsWith("postgres://")
     }
 }
 
+// Configuração exclusiva para PostgreSQL (Npgsql)
 builder.Services.AddDbContext<AppDbContext>(options =>
 {
-    if (connectionString.Contains("Data Source=", StringComparison.OrdinalIgnoreCase) ||
-        connectionString.Contains("Filename=", StringComparison.OrdinalIgnoreCase) ||
-        connectionString.Contains(":memory:", StringComparison.OrdinalIgnoreCase))
-    {
-        options.UseSqlite(connectionString);
-    }
-    else
-    {
-        options.UseNpgsql(connectionString);
-    }
+    options.UseNpgsql(connectionString);
 });
 
 builder.Services.AddEndpointsApiExplorer();
 
 var app = builder.Build();
-
-// Removido o bloco "EnsureCreated()" daqui para evitar conflito com o banco em memória dos testes
 
 app.MapGet("/docs", () => Results.Redirect("/scalar/v1"))
    .ExcludeFromDescription();

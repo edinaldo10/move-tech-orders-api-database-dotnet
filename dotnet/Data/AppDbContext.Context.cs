@@ -14,8 +14,8 @@ public class AppDbContext : DbContext
     {
         base.OnModelCreating(modelBuilder);
 
-        // Mapeia explicitamente ambas as tabelas para garantir que o SQLite as crie corretamente
-        modelBuilder.Entity<Order>().ToTable("Orders");
-        modelBuilder.Entity<Item>().ToTable("Items");
+        // Mapeia explicitamente as tabelas para o PostgreSQL (usando minúsculas se preferir padrão SQL, ou mantendo Orders/Items)
+        modelBuilder.Entity<Order>().ToTable("orders");
+        modelBuilder.Entity<Item>().ToTable("items");
     }
 }

@@ -3,7 +3,6 @@ using System.Net.Http.Json;
 using System.Linq;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
-using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
@@ -12,8 +11,6 @@ using CloudApplication.Models;
 
 public class CustomWebApplicationFactory : WebApplicationFactory<Program>
 {
-    private SqliteConnection? _connection;
-
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         builder.ConfigureServices(services =>
@@ -27,27 +24,22 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
                 services.Remove(descriptor);
             }
 
-            // String de conexão corrigida para SQLite em memória compartilhada
-            _connection = new SqliteConnection("DataSource=:memory:;Cache=Shared");
-            _connection.Open();
+            // Força o uso do PostgreSQL também nos testes (pegando da variável de ambiente ou string padrão do workflow)
+            var connectionString = Environment.GetEnvironmentVariable("DATABASE_URL") 
+                                   ?? "Host=localhost;Port=5432;Database=orders;Username=postgres;Password=postgres";
 
             services.AddDbContext<AppDbContext>(options =>
             {
-                options.UseSqlite(_connection);
+                options.UseNpgsql(connectionString);
             });
 
             var sp = services.BuildServiceProvider();
             using var scope = sp.CreateScope();
             var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            
+            // Garante que o banco e as tabelas sejam criados/migrados antes dos testes rodarem no Postgres
             db.Database.EnsureCreated();
         });
-    }
-
-    protected override void Dispose(bool disposing)
-    {
-        base.Dispose(disposing);
-        _connection?.Close();
-        _connection?.Dispose();
     }
 }
 
