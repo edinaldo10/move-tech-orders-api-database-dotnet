@@ -18,7 +18,6 @@ public class Order
     
     public List<Item> Items { get; set; } = new();
 }
-
 [Table("items")]
 public class Item
 {
