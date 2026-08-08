@@ -15,10 +15,8 @@ public class AppDbContext : DbContext
     {
         base.OnModelCreating(modelBuilder);
 
-        // Mapeia explicitamente a entidade Order para a tabela "orders" em minúsculas
+        // Força os nomes exatos das tabelas em minúsculas no banco de dados
         modelBuilder.Entity<Order>().ToTable("orders");
-        
-        // Caso a tabela de itens também precise seguir o mesmo padrão minúsculo:
         modelBuilder.Entity<Item>().ToTable("items");
     }
 }
