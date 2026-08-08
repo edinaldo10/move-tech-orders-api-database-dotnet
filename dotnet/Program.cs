@@ -48,12 +48,13 @@ builder.Services.AddEndpointsApiExplorer();
 
 var app = builder.Build();
 
-// Inicialização segura do Banco de Dados mantendo conexão SQLite persistente se necessário
+// Inicialização segura do banco garantindo que as tabelas existam antes de aceitar requisições
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     try
     {
+        // Se for SQLite, garante que a conexão in-memory permaneça aberta para preservar as tabelas
         if (db.Database.IsSqlite())
         {
             var connection = db.Database.GetDbConnection();
@@ -62,12 +63,11 @@ using (var scope = app.Services.CreateScope())
                 connection.Open();
             }
         }
-
         db.Database.EnsureCreated();
     }
     catch
     {
-        // Ignora concorrência de criação
+        // Ignora conflitos de concorrência com múltiplas instâncias
     }
 }
 
