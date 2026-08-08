@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.Http.Json;
+using System.Linq;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Data.Sqlite;
@@ -11,6 +12,8 @@ using CloudApplication.Models;
 
 public class CustomWebApplicationFactory : WebApplicationFactory<Program>
 {
+    private SqliteConnection? _connection;
+
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         builder.ConfigureServices(services =>
@@ -23,26 +26,28 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
                 services.Remove(descriptor);
             }
 
-            // Garante uma conexão SQLite em memória persistente
-            services.AddSingleton<SqliteConnection>(container =>
+            // Cria uma conexão SQLite compartilhada e aberta durante toda a vida útil dos testes
+            _connection = new SqliteConnection("DataSource=:memory:");
+            _connection.Open();
+
+            services.AddDbContext<AppDbContext>(options =>
             {
-                var connection = new SqliteConnection("DataSource=:memory:");
-                connection.Open();
-                return connection;
+                options.UseSqlite(_connection);
             });
 
-            services.AddDbContext<AppDbContext>((container, options) =>
-            {
-                var connection = container.GetRequiredService<SqliteConnection>();
-                options.UseSqlite(connection);
-            });
-
-            // Inicializa o banco e as tabelas usando o escopo e a conexão aberta
+            // Constrói o provedor e garante que a tabela seja criada imediatamente na conexão aberta
             var sp = services.BuildServiceProvider();
             using var scope = sp.CreateScope();
             var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
             db.Database.EnsureCreated();
         });
+    }
+
+    protected override void Dispose(bool disposing)
+    {
+        base.Dispose(disposing);
+        _connection?.Close();
+        _connection?.Dispose();
     }
 }
 

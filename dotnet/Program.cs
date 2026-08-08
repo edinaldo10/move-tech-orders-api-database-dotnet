@@ -30,11 +30,12 @@ if (!string.IsNullOrEmpty(databaseUrl) && (databaseUrl.StartsWith("postgres://")
     }
 }
 
-// Configuração dinâmica: Suporta PostgreSQL por padrão ou SQLite caso especificado (útil para testes)
+// Configuração dinâmica: Suporta SQLite (testes) ou PostgreSQL (produção/runtime)
 builder.Services.AddDbContext<AppDbContext>(options =>
 {
     if (connectionString.Contains("Data Source=", StringComparison.OrdinalIgnoreCase) ||
-        connectionString.Contains("Filename=", StringComparison.OrdinalIgnoreCase))
+        connectionString.Contains("Filename=", StringComparison.OrdinalIgnoreCase) ||
+        connectionString.Contains(":memory:", StringComparison.OrdinalIgnoreCase))
     {
         options.UseSqlite(connectionString);
     }
@@ -48,21 +49,18 @@ builder.Services.AddEndpointsApiExplorer();
 
 var app = builder.Build();
 
-// Inicialização segura do banco garantindo que as tabelas existam antes de aceitar requisições
+// Inicialização segura do banco de dados na inicialização da API
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     try
     {
-        // Se for SQLite, garante que a conexão in-memory permaneça aberta para preservar as tabelas
-        if (db.Database.IsSqlite())
+        var connection = db.Database.GetDbConnection();
+        if (connection.State != System.Data.ConnectionState.Open)
         {
-            var connection = db.Database.GetDbConnection();
-            if (connection.State != System.Data.ConnectionState.Open)
-            {
-                connection.Open();
-            }
+            connection.Open();
         }
+        
         db.Database.EnsureCreated();
     }
     catch
