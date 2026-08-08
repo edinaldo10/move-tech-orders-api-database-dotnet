@@ -74,13 +74,15 @@ jobs:
         docker push $BASE:${{ github.sha }}
         docker push $BASE:latest
 
-    - name: Configurar kubectl
+    - name: Configurar kubectl e Validar Cluster
       run: |
         if [ -z "${{ secrets.MGC_KUBECONFIG }}" ]; then
           echo "Erro: O secret MGC_KUBECONFIG esta vazio!"
           exit 1
         fi
         echo "${{ secrets.MGC_KUBECONFIG }}" > kubeconfig.yaml
+        export KUBECONFIG=kubeconfig.yaml
+        kubectl cluster-info
 
     - name: Criar Secret do registry
       run: |
@@ -91,7 +93,6 @@ jobs:
           --docker-password=${{ secrets.MGC_REGISTRY_PASSWORD }} \
           --dry-run=client -o yaml | kubectl apply -n default -f -
 
-    # ETAPA ADICIONADA: Cria/Atualiza o db-secret no cluster automaticamente
     - name: Criar Secret do Banco de Dados
       run: |
         export KUBECONFIG=kubeconfig.yaml
