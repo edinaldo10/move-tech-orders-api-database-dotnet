@@ -26,7 +26,6 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
                 services.Remove(descriptor);
             }
 
-            // Cria uma conexão SQLite compartilhada e aberta durante toda a vida útil dos testes
             _connection = new SqliteConnection("DataSource=:memory:");
             _connection.Open();
 
@@ -35,7 +34,6 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
                 options.UseSqlite(_connection);
             });
 
-            // Constrói o provedor e garante que a tabela seja criada imediatamente na conexão aberta
             var sp = services.BuildServiceProvider();
             using var scope = sp.CreateScope();
             var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();

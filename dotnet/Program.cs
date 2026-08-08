@@ -5,13 +5,11 @@ using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Captura a string de conexão priorizando a variável de ambiente, depois a config, e por fim um padrão
 var databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
 var connectionString = databaseUrl
     ?? builder.Configuration.GetConnectionString("DefaultConnection")
     ?? "Host=localhost;Port=5432;Database=orders;Username=postgres;Password=postgres";
 
-// Ajuste robusto para aceitar URLs do PostgreSQL (ex: postgres://user:pass@host:port/db)
 if (!string.IsNullOrEmpty(databaseUrl) && (databaseUrl.StartsWith("postgres://") || databaseUrl.StartsWith("postgresql://")))
 {
     try
@@ -30,7 +28,6 @@ if (!string.IsNullOrEmpty(databaseUrl) && (databaseUrl.StartsWith("postgres://")
     }
 }
 
-// Configuração dinâmica: Suporta SQLite (testes) ou PostgreSQL (produção/runtime)
 builder.Services.AddDbContext<AppDbContext>(options =>
 {
     if (connectionString.Contains("Data Source=", StringComparison.OrdinalIgnoreCase) ||
@@ -49,25 +46,7 @@ builder.Services.AddEndpointsApiExplorer();
 
 var app = builder.Build();
 
-// Inicialização segura do banco de dados na inicialização da API
-using (var scope = app.Services.CreateScope())
-{
-    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    try
-    {
-        var connection = db.Database.GetDbConnection();
-        if (connection.State != System.Data.ConnectionState.Open)
-        {
-            connection.Open();
-        }
-        
-        db.Database.EnsureCreated();
-    }
-    catch
-    {
-        // Ignora conflitos de concorrência com múltiplas instâncias
-    }
-}
+// (Removido o bloco EnsureCreated daqui para evitar conflito com os testes de integração)
 
 app.MapGet("/docs", () => Results.Redirect("/scalar/v1"))
    .ExcludeFromDescription();
@@ -77,7 +56,6 @@ app.MapScalarApiReference(options =>
     options.Title = "API de Pedidos (.NET)";
 });
 
-// Endpoint de health verificando a conectividade com o banco
 app.MapGet("/health", async (AppDbContext db) =>
 {
     try
