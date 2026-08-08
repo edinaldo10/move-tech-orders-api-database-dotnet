@@ -23,7 +23,7 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
                 services.Remove(descriptor);
             }
 
-            // Garante uma conexão SQLite em memória persistente (compartilhada por thread/conexão)
+            // Garante uma conexão SQLite em memória persistente
             services.AddSingleton<SqliteConnection>(container =>
             {
                 var connection = new SqliteConnection("DataSource=:memory:");

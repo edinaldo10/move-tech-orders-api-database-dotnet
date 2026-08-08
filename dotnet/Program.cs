@@ -7,8 +7,8 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Captura a string de conexão priorizando a variável de ambiente, depois a config, e por fim um padrão
 var databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
-var connectionString = databaseUrl 
-    ?? builder.Configuration.GetConnectionString("DefaultConnection") 
+var connectionString = databaseUrl
+    ?? builder.Configuration.GetConnectionString("DefaultConnection")
     ?? "Host=localhost;Port=5432;Database=orders;Username=postgres;Password=postgres";
 
 // Ajuste robusto para aceitar URLs do PostgreSQL (ex: postgres://user:pass@host:port/db)
@@ -33,7 +33,7 @@ if (!string.IsNullOrEmpty(databaseUrl) && (databaseUrl.StartsWith("postgres://")
 // Configuração dinâmica: Suporta PostgreSQL por padrão ou SQLite caso especificado (útil para testes)
 builder.Services.AddDbContext<AppDbContext>(options =>
 {
-    if (connectionString.Contains("Data Source=", StringComparison.OrdinalIgnoreCase) || 
+    if (connectionString.Contains("Data Source=", StringComparison.OrdinalIgnoreCase) ||
         connectionString.Contains("Filename=", StringComparison.OrdinalIgnoreCase))
     {
         options.UseSqlite(connectionString);
@@ -101,10 +101,10 @@ app.MapPost("/orders", async (OrderCreateDto dto, AppDbContext db) =>
 {
     var order = new Order
     {
-        Id = Guid.NewGuid().ToString(), // Garante ID caso a entidade utilize string
+        Id = Guid.NewGuid().ToString(),
         Customer = dto.Customer,
-        Status = "Created",             // Define status inicial padrão para evitar nulos
-        CreatedAt = DateTime.UtcNow.ToString("o") // Garante data preenchida
+        Status = "Created",
+        CreatedAt = DateTime.UtcNow // Atribuindo diretamente o DateTime correto sem conflito de tipo
     };
     db.Orders.Add(order);
     await db.SaveChangesAsync();
@@ -128,7 +128,7 @@ app.MapPost("/orders/{id}/items", async (string id, ItemCreateDto dto, AppDbCont
 
     var item = new Item
     {
-        Id = Guid.NewGuid().ToString(), // Garante ID do item caso seja string
+        Id = Guid.NewGuid().ToString(),
         OrderId = id,
         Sku = dto.Sku,
         Description = dto.Description,
