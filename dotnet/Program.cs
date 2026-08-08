@@ -46,7 +46,12 @@ builder.Services.AddEndpointsApiExplorer();
 
 var app = builder.Build();
 
-// (Removido o bloco EnsureCreated daqui para evitar conflito com os testes de integração)
+// Garante a criação do banco de dados e da tabela "orders" no SQLite/PostgreSQL ao iniciar
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    db.Database.EnsureCreated();
+}
 
 app.MapGet("/docs", () => Results.Redirect("/scalar/v1"))
    .ExcludeFromDescription();

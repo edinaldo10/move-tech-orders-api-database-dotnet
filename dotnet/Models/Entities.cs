@@ -1,9 +1,9 @@
 using System.ComponentModel.DataAnnotations;
-using CloudApplication.Models;
-using CloudApplication.Data;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace CloudApplication.Models;
 
+[Table("orders")]
 public class Order
 {
     [Key]
@@ -19,6 +19,7 @@ public class Order
     public List<Item> Items { get; set; } = new();
 }
 
+[Table("items")]
 public class Item
 {
     [Key]
@@ -36,5 +37,6 @@ public class Item
     [Required]
     public int Quantity { get; set; }
     
+    [ForeignKey("OrderId")]
     public Order Order { get; set; } = null!;
 }
