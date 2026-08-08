@@ -7,15 +7,15 @@ public class AppDbContext : DbContext
 {
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
-    // Mudado de Orders para orders
-    public DbSet<Order> orders => Set<Order>();
-    public DbSet<Item> items => Set<Item>();
+    public DbSet<Order> Orders => Set<Order>();
+    public DbSet<Item> Items => Set<Item>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
 
-        modelBuilder.Entity<Order>().ToTable("orders");
-        modelBuilder.Entity<Item>().ToTable("items");
+        // Mapeia explicitamente para o nome que o EF Core gera por padrão (Orders)
+        modelBuilder.Entity<Order>().ToTable("Orders");
+        modelBuilder.Entity<Item>().ToTable("Items");
     }
 }
