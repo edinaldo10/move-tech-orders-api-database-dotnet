@@ -14,7 +14,7 @@ public class AppDbContext : DbContext
     {
         base.OnModelCreating(modelBuilder);
 
-        // Mapeia explicitamente para o nome que o EF Core gera por padrão (Orders)
+        // Mapeia explicitamente ambas as tabelas para garantir que o SQLite as crie corretamente
         modelBuilder.Entity<Order>().ToTable("Orders");
         modelBuilder.Entity<Item>().ToTable("Items");
     }
