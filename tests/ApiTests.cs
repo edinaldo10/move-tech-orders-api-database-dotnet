@@ -37,6 +37,9 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
             var sp = services.BuildServiceProvider();
             using var scope = sp.CreateScope();
             var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            
+            // Garante que o banco e as tabelas sejam recriadas respeitando o mapeamento
+            db.Database.EnsureDeleted();
             db.Database.EnsureCreated();
         });
     }
@@ -48,7 +51,6 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
         _connection?.Dispose();
     }
 }
-
 public class ApiTests : IClassFixture<CustomWebApplicationFactory>
 {
     private readonly HttpClient _client;
