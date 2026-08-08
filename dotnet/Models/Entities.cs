@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace CloudApplication.Models;
 
-[Table("orders")]
+[Table("Orders")]
 public class Order
 {
     [Key]
@@ -18,7 +18,8 @@ public class Order
     
     public List<Item> Items { get; set; } = new();
 }
-[Table("items")]
+
+[Table("Items")]
 public class Item
 {
     [Key]

@@ -28,8 +28,10 @@ if (!string.IsNullOrEmpty(databaseUrl) && (databaseUrl.StartsWith("postgres://")
     }
 }
 
-builder.Services.AddDbContext<AppDbContext>(options =>
+// Configuração flexível do DbContext para aceitar tanto PostgreSQL quanto Sqlite (testes)
+builder.Services.AddDbContext<AppDbContext>((sp, options) =>
 {
+    // Se uma conexão já foi injetada externamente (ex: pelos testes), respeita-a
     if (connectionString.Contains("Data Source=", StringComparison.OrdinalIgnoreCase) ||
         connectionString.Contains("Filename=", StringComparison.OrdinalIgnoreCase) ||
         connectionString.Contains(":memory:", StringComparison.OrdinalIgnoreCase))
@@ -86,24 +88,24 @@ app.MapPost("/orders", async (OrderCreateDto dto, AppDbContext db) =>
         Status = "Created",
         CreatedAt = DateTime.UtcNow
     };
-    db.orders.Add(order); // Usando db.orders
+    db.Orders.Add(order);
     await db.SaveChangesAsync();
     return Results.Created($"/orders/{order.Id}", order);
 }).WithTags("orders");
 
 app.MapGet("/orders", async (AppDbContext db) =>
-    await db.orders.Include(o => o.Items).ToListAsync() // Usando db.orders
+    await db.Orders.Include(o => o.Items).ToListAsync()
 ).WithTags("orders");
 
 app.MapGet("/orders/{id}", async (string id, AppDbContext db) =>
 {
-    var order = await db.orders.Include(o => o.Items).FirstOrDefaultAsync(o => o.Id == id); // Usando db.orders
+    var order = await db.Orders.Include(o => o.Items).FirstOrDefaultAsync(o => o.Id == id);
     return order is not null ? Results.Ok(order) : Results.NotFound(new { detail = "Pedido não encontrado" });
 }).WithTags("orders");
 
 app.MapPost("/orders/{id}/items", async (string id, ItemCreateDto dto, AppDbContext db) =>
 {
-    var order = await db.orders.FindAsync(id); // Usando db.orders
+    var order = await db.Orders.FindAsync(id);
     if (order is null) return Results.NotFound(new { detail = "Pedido não encontrado" });
 
     var item = new Item
@@ -114,21 +116,21 @@ app.MapPost("/orders/{id}/items", async (string id, ItemCreateDto dto, AppDbCont
         Description = dto.Description,
         Quantity = dto.Quantity
     };
-    db.items.Add(item); // Usando db.items
+    db.Items.Add(item);
     await db.SaveChangesAsync();
     return Results.Created($"/orders/{id}/items/{item.Id}", item);
 }).WithTags("items");
 
 app.MapGet("/orders/{id}/items", async (string id, AppDbContext db) =>
 {
-    var order = await db.orders.Include(o => o.Items).FirstOrDefaultAsync(o => o.Id == id); // Usando db.orders
+    var order = await db.Orders.Include(o => o.Items).FirstOrDefaultAsync(o => o.Id == id);
     if (order is null) return Results.NotFound(new { detail = "Pedido não encontrado" });
     return Results.Ok(order.Items);
 }).WithTags("items");
 
 app.MapDelete("/orders/{id}", async (string id, AppDbContext db) =>
 {
-    var order = await db.orders.FindAsync(id); // Usando db.orders
+    var order = await db.Orders.FindAsync(id);
     if (order is null) return Results.NotFound(new { detail = "Pedido não encontrado" });
     order.Status = "cancelled";
     await db.SaveChangesAsync();
