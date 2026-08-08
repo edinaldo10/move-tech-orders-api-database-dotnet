@@ -28,10 +28,8 @@ if (!string.IsNullOrEmpty(databaseUrl) && (databaseUrl.StartsWith("postgres://")
     }
 }
 
-// Configuração flexível do DbContext para aceitar tanto PostgreSQL quanto Sqlite (testes)
-builder.Services.AddDbContext<AppDbContext>((sp, options) =>
+builder.Services.AddDbContext<AppDbContext>(options =>
 {
-    // Se uma conexão já foi injetada externamente (ex: pelos testes), respeita-a
     if (connectionString.Contains("Data Source=", StringComparison.OrdinalIgnoreCase) ||
         connectionString.Contains("Filename=", StringComparison.OrdinalIgnoreCase) ||
         connectionString.Contains(":memory:", StringComparison.OrdinalIgnoreCase))
@@ -48,11 +46,7 @@ builder.Services.AddEndpointsApiExplorer();
 
 var app = builder.Build();
 
-using (var scope = app.Services.CreateScope())
-{
-    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    db.Database.EnsureCreated();
-}
+// Removido o bloco "EnsureCreated()" daqui para evitar conflito com o banco em memória dos testes
 
 app.MapGet("/docs", () => Results.Redirect("/scalar/v1"))
    .ExcludeFromDescription();
