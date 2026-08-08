@@ -104,7 +104,7 @@ app.MapPost("/orders", async (OrderCreateDto dto, AppDbContext db) =>
         Id = Guid.NewGuid().ToString(),
         Customer = dto.Customer,
         Status = "Created",
-        CreatedAt = DateTime.UtcNow // Atribuindo diretamente o DateTime correto sem conflito de tipo
+        CreatedAt = DateTime.UtcNow
     };
     db.Orders.Add(order);
     await db.SaveChangesAsync();
