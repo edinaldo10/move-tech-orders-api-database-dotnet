@@ -18,7 +18,6 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
     {
         builder.ConfigureServices(services =>
         {
-            // Remove qualquer configuração anterior do DbContext
             var descriptors = services.Where(
                 d => d.ServiceType == typeof(DbContextOptions<AppDbContext>) ||
                      d.ServiceType == typeof(DbContextOptions)).ToList();
@@ -28,8 +27,8 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
                 services.Remove(descriptor);
             }
 
-            // Abre uma conexão SQLite compartilhada em memória que não fecha ao trocar de thread
-            _connection = new SqliteConnection("DataSource=Filename=:memory:;Cache=Shared");
+            // String de conexão corrigida para SQLite em memória compartilhada
+            _connection = new SqliteConnection("DataSource=:memory:;Cache=Shared");
             _connection.Open();
 
             services.AddDbContext<AppDbContext>(options =>
@@ -37,7 +36,6 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
                 options.UseSqlite(_connection);
             });
 
-            // Cria o banco e as tabelas com o nome correto esperado pelo EF Core ("Orders")
             var sp = services.BuildServiceProvider();
             using var scope = sp.CreateScope();
             var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
