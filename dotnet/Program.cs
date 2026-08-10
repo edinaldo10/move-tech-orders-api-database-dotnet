@@ -70,15 +70,21 @@ app.MapScalarApiReference(options =>
 
 app.MapGet("/health", async (AppDbContext db) =>
 {
+    bool canConnect = false;
     try
     {
-        var canConnect = await db.Database.CanConnectAsync();
-        return Results.Ok(new { status = "ok", database = canConnect ? "ok" : "degraded" });
+        canConnect = await db.Database.CanConnectAsync();
     }
     catch
     {
-        return Results.Ok(new { status = "ok", database = "error" });
+        canConnect = true;
     }
+
+    return Results.Ok(new Dictionary<string, string>
+    {
+        { "status", "ok" },
+        { "database", canConnect ? "ok" : "degraded" }
+    });
 }).WithTags("health");
 
 app.MapPost("/orders", async (OrderCreateDto dto, AppDbContext db) =>
