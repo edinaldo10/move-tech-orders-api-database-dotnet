@@ -21,7 +21,7 @@ spec:
         image: container-registry.br-se1.magalu.cloud/${MGC_REGISTRY_NAME}/cloud-application-dotnet:latest
         imagePullPolicy: Always
         ports:
-        - containerPort: 8000
+        - containerPort: 8080
         env:
         - name: DATABASE_URL
           valueFrom:
@@ -31,13 +31,13 @@ spec:
         livenessProbe:
           httpGet:
             path: /health
-            port: 8000
+            port: 8080
           initialDelaySeconds: 30
           periodSeconds: 15
         readinessProbe:
           httpGet:
             path: /health
-            port: 8000
+            port: 8080
           initialDelaySeconds: 15
           periodSeconds: 10
 ---
@@ -50,6 +50,6 @@ spec:
     app: cloud-application
   type: LoadBalancer
   ports:
-  - port: 8000
-    targetPort: 8000
+  - port: 80
+    targetPort: 8080
     protocol: TCP
