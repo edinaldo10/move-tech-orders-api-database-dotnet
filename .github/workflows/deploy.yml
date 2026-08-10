@@ -18,9 +18,9 @@ jobs:
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: ${{ env.DOTNET_VERSION }}
-
+    
     - name: Restaurar dependências
-      run: dotnet restore
+      run: dotnet restore CloudApplication.sln
       working-directory: ./dotnet
 
     - name: Compilar projeto
