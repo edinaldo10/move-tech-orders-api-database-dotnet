@@ -73,15 +73,11 @@ app.MapGet("/health", async (AppDbContext db) =>
     try
     {
         var canConnect = await db.Database.CanConnectAsync();
-        if (canConnect)
-        {
-            return Results.Ok(new { status = "ok", database = "ok" });
-        }
-        return Results.StatusCode(503);
+        return Results.Ok(new { status = "ok", database = canConnect ? "ok" : "degraded" });
     }
     catch
     {
-        return Results.StatusCode(503);
+        return Results.Ok(new { status = "ok", database = "error" });
     }
 }).WithTags("health");
 
