@@ -68,17 +68,20 @@ app.MapScalarApiReference(options =>
     options.Title = "API de Pedidos (.NET)";
 });
 
-// Health check definitivo: atende ao teste e garante 200 OK para o Kubernetes
 app.MapGet("/health", async (AppDbContext db) =>
 {
     try
     {
         var canConnect = await db.Database.CanConnectAsync();
-        return Results.Ok(new { status = "ok", database = canConnect ? "ok" : "degraded" });
+        if (canConnect)
+        {
+            return Results.Ok(new { status = "ok", database = "ok" });
+        }
+        return Results.StatusCode(503);
     }
     catch
     {
-        return Results.Ok(new { status = "ok", database = "ok" });
+        return Results.StatusCode(503);
     }
 }).WithTags("health");
 
