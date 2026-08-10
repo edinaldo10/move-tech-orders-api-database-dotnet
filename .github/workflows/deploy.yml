@@ -1,0 +1,79 @@
+name: Deploy
+
+on:
+  workflow_dispatch:
+
+env:
+  REGISTRY: container-registry.br-se1.magalu.cloud
+  IMAGE_NAME: cloud-application-dotnet
+  DOTNET_VERSION: '8.0'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Configurar .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+
+    - name: Restaurar dependências
+      run: dotnet restore
+      working-directory: ./dotnet
+
+    - name: Compilar projeto
+      run: dotnet build --no-restore --configuration Release
+      working-directory: ./dotnet
+
+    - name: Executar testes
+      run: dotnet test --no-build --configuration Release --verbosity normal
+      working-directory: ./dotnet
+
+  build-and-deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Login no Container Registry
+      run: |
+        docker login https://${{ env.REGISTRY }} \
+          -u ${{ secrets.MGC_REGISTRY_USER }} \
+          -p ${{ secrets.MGC_REGISTRY_PASSWORD }}
+
+    - name: Build e push da imagem
+      run: |
+        BASE=${{ env.REGISTRY }}/${{ secrets.MGC_REGISTRY_NAME }}/${{ env.IMAGE_NAME }}
+        docker build --no-cache -t $BASE:${{ github.sha }} -t $BASE:latest .
+        docker push $BASE:${{ github.sha }}
+        docker push $BASE:latest
+
+    - name: Configurar kubectl
+      run: |
+        echo "${{ secrets.MGC_KUBECONFIG }}" > kubeconfig.yaml
+
+    - name: Criar Secret do registry
+      run: |
+        export KUBECONFIG=kubeconfig.yaml
+        kubectl create secret docker-registry registry-secret \
+          --docker-server=${{ env.REGISTRY }} \
+          --docker-username=${{ secrets.MGC_REGISTRY_USER }} \
+          --docker-password=${{ secrets.MGC_REGISTRY_PASSWORD }} \
+          --dry-run=client -o yaml | kubectl apply -n default -f -
+
+    - name: Criar Secret do banco
+      run: |
+        export KUBECONFIG=kubeconfig.yaml
+        kubectl create secret generic db-secret \
+          --from-literal=url=${{ secrets.DATABASE_URL }} \
+          --dry-run=client -o yaml | kubectl apply -n default -f -
+
+    - name: Deploy no Kubernetes
+      run: |
+        export KUBECONFIG=kubeconfig.yaml
+        export MGC_REGISTRY_NAME=${{ secrets.MGC_REGISTRY_NAME }}
+        export IMAGE_TAG=${{ github.sha }}
+        envsubst '$MGC_REGISTRY_NAME $IMAGE_TAG' < k8s/app.yaml | kubectl apply -f -
+        kubectl rollout status deployment/cloud-application -n default
