@@ -46,7 +46,19 @@ builder.Services.AddEndpointsApiExplorer();
 
 var app = builder.Build();
 
-// Removido o bloco "EnsureCreated()" daqui para evitar conflito com o banco em memória dos testes
+// Garante que o banco e as tabelas sejam criados ao iniciar na nuvem (sem afetar testes em memória)
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    try
+    {
+        db.Database.EnsureCreated();
+    }
+    catch
+    {
+        // Ignora falhas transitórias caso o banco demore alguns segundos a mais para aceitar conexões
+    }
+}
 
 app.MapGet("/docs", () => Results.Redirect("/scalar/v1"))
    .ExcludeFromDescription();
