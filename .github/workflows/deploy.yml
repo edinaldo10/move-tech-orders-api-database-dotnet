@@ -19,6 +19,14 @@ jobs:
       with:
         dotnet-version: ${{ env.DOTNET_VERSION }}
       
+    - name: Cache de dependências NuGet
+      uses: actions/cache@v4
+      with:
+        path: ~/.nuget/packages
+        key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj', '**/*.sln') }}
+        restore-keys: |
+          ${{ runner.os }}-nuget-
+
     - name: Restaurar dependências
       run: dotnet restore CloudApplication.sln
 
