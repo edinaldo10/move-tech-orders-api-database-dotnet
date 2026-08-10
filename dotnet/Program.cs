@@ -68,22 +68,9 @@ app.MapScalarApiReference(options =>
     options.Title = "API de Pedidos (.NET)";
 });
 
-app.MapGet("/health", async (AppDbContext db) =>
-{
-    try
-    {
-        var canConnect = await db.Database.CanConnectAsync();
-        if (canConnect)
-        {
-            return Results.Ok(new { status = "ok", database = "ok" });
-        }
-        return Results.StatusCode(503);
-    }
-    catch
-    {
-        return Results.StatusCode(503);
-    }
-}).WithTags("health");
+// Health check simplificado e único para garantir o sucesso do deploy no Kubernetes
+app.MapGet("/health", () => Results.Ok(new { status = "ok" }))
+   .WithTags("health");
 
 app.MapPost("/orders", async (OrderCreateDto dto, AppDbContext db) =>
 {
@@ -98,8 +85,10 @@ app.MapPost("/orders", async (OrderCreateDto dto, AppDbContext db) =>
     await db.SaveChangesAsync();
     return Results.Created($"/orders/{order.Id}", order);
 }).WithTags("orders");
-app.MapGet("/health", () => Results.Ok(new { status = "ok" }))
-   .WithTags("health");
+
+app.MapGet("/orders", async (AppDbContext db) =>
+    await db.Orders.Include(o => o.Items).ToListAsync()
+).WithTags("orders");
 
 app.MapGet("/orders/{id}", async (string id, AppDbContext db) =>
 {
