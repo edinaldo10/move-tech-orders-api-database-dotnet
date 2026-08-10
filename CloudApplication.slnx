@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/dotnet/">
+    <Project Path="dotnet/cloud-application.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/cloud-application-tests.csproj" />
+  </Folder>
+</Solution>
