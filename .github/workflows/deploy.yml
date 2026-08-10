@@ -23,7 +23,7 @@ jobs:
       run: dotnet restore CloudApplication.sln
 
     - name: Compilar projeto
-      run: dotnet build --no-restore --configuration Release CloudApplication.sln
+      run: dotnet build --configuration Release CloudApplication.sln
 
     - name: Executar testes
       run: dotnet test --no-build --configuration Release --verbosity normal CloudApplication.sln
