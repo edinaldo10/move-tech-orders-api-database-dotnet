@@ -20,13 +20,13 @@ jobs:
         dotnet-version: ${{ env.DOTNET_VERSION }}
       
     - name: Restaurar dependências
-      run: dotnet restore CloudApplication.slnx
+      run: dotnet restore CloudApplication.sln
 
     - name: Compilar projeto
-      run: dotnet build --no-restore --configuration Release CloudApplication.slnx
+      run: dotnet build --no-restore --configuration Release CloudApplication.sln
 
     - name: Executar testes
-      run: dotnet test --no-build --configuration Release --verbosity normal CloudApplication.slnx
+      run: dotnet test --no-build --configuration Release --verbosity normal CloudApplication.sln
 
   build-and-deploy:
     needs: test
