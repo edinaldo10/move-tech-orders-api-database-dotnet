@@ -1,8 +1,56 @@
-<Solution>
-  <Folder Name="/dotnet/">
-    <Project Path="dotnet/cloud-application.csproj" />
-  </Folder>
-  <Folder Name="/tests/">
-    <Project Path="tests/cloud-application-tests.csproj" />
-  </Folder>
-</Solution>
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "dotnet", "dotnet", "{71E6E750-85FD-B5BC-4321-E01377EC6231}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "cloud-application", "dotnet\cloud-application.csproj", "{AEFF11AF-AA69-4054-8C8A-45D6FBDEA61E}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{0AB3BF05-4346-4AA6-1389-037BE0695223}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "cloud-application-tests", "tests\cloud-application-tests.csproj", "{59AF3E61-987A-4DC8-9D95-C59834DA8288}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Release|Any CPU = Release|Any CPU
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{AEFF11AF-AA69-4054-8C8A-45D6FBDEA61E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AEFF11AF-AA69-4054-8C8A-45D6FBDEA61E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AEFF11AF-AA69-4054-8C8A-45D6FBDEA61E}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{AEFF11AF-AA69-4054-8C8A-45D6FBDEA61E}.Debug|x64.Build.0 = Debug|Any CPU
+		{AEFF11AF-AA69-4054-8C8A-45D6FBDEA61E}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{AEFF11AF-AA69-4054-8C8A-45D6FBDEA61E}.Debug|x86.Build.0 = Debug|Any CPU
+		{AEFF11AF-AA69-4054-8C8A-45D6FBDEA61E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AEFF11AF-AA69-4054-8C8A-45D6FBDEA61E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AEFF11AF-AA69-4054-8C8A-45D6FBDEA61E}.Release|x64.ActiveCfg = Release|Any CPU
+		{AEFF11AF-AA69-4054-8C8A-45D6FBDEA61E}.Release|x64.Build.0 = Release|Any CPU
+		{AEFF11AF-AA69-4054-8C8A-45D6FBDEA61E}.Release|x86.ActiveCfg = Release|Any CPU
+		{AEFF11AF-AA69-4054-8C8A-45D6FBDEA61E}.Release|x86.Build.0 = Release|Any CPU
+		{59AF3E61-987A-4DC8-9D95-C59834DA8288}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{59AF3E61-987A-4DC8-9D95-C59834DA8288}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{59AF3E61-987A-4DC8-9D95-C59834DA8288}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{59AF3E61-987A-4DC8-9D95-C59834DA8288}.Debug|x64.Build.0 = Debug|Any CPU
+		{59AF3E61-987A-4DC8-9D95-C59834DA8288}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{59AF3E61-987A-4DC8-9D95-C59834DA8288}.Debug|x86.Build.0 = Debug|Any CPU
+		{59AF3E61-987A-4DC8-9D95-C59834DA8288}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{59AF3E61-987A-4DC8-9D95-C59834DA8288}.Release|Any CPU.Build.0 = Release|Any CPU
+		{59AF3E61-987A-4DC8-9D95-C59834DA8288}.Release|x64.ActiveCfg = Release|Any CPU
+		{59AF3E61-987A-4DC8-9D95-C59834DA8288}.Release|x64.Build.0 = Release|Any CPU
+		{59AF3E61-987A-4DC8-9D95-C59834DA8288}.Release|x86.ActiveCfg = Release|Any CPU
+		{59AF3E61-987A-4DC8-9D95-C59834DA8288}.Release|x86.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{AEFF11AF-AA69-4054-8C8A-45D6FBDEA61E} = {71E6E750-85FD-B5BC-4321-E01377EC6231}
+		{59AF3E61-987A-4DC8-9D95-C59834DA8288} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
+	EndGlobalSection
+EndGlobal
