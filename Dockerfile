@@ -7,7 +7,7 @@ RUN dotnet restore "cloud-application.csproj"
 
 # Copia todo o código fonte da pasta dotnet/ para o container
 COPY dotnet/ ./
-RUN dotnet publish -c Release -o /app/publish
+RUN dotnet publish "cloud-application.csproj" -c Release -o /app/publish
 
 FROM mcr.microsoft.com/dotnet/aspnet:8.0
 WORKDIR /app
