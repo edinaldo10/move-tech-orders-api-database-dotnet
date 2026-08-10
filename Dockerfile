@@ -1,11 +1,11 @@
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
-# Copia o csproj da pasta dotnet/ para dentro do container
+# Copia o csproj de dentro da pasta dotnet/
 COPY ["dotnet/cloud-application.csproj", "./"]
 RUN dotnet restore "cloud-application.csproj"
 
-# Copia todo o restante do código da pasta dotnet/
+# Copia todo o código fonte da pasta dotnet/ para o container
 COPY dotnet/ ./
 RUN dotnet publish -c Release -o /app/publish
 
