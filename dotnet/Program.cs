@@ -98,10 +98,8 @@ app.MapPost("/orders", async (OrderCreateDto dto, AppDbContext db) =>
     await db.SaveChangesAsync();
     return Results.Created($"/orders/{order.Id}", order);
 }).WithTags("orders");
-
-app.MapGet("/orders", async (AppDbContext db) =>
-    await db.Orders.Include(o => o.Items).ToListAsync()
-).WithTags("orders");
+app.MapGet("/health", () => Results.Ok(new { status = "ok" }))
+   .WithTags("health");
 
 app.MapGet("/orders/{id}", async (string id, AppDbContext db) =>
 {
