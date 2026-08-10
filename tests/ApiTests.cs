@@ -1,6 +1,7 @@
 using System.Net;
 using System.Net.Http.Json;
 using System.Linq;
+using System.Text.Json;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Data.Sqlite;
@@ -29,7 +30,6 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
                 services.Remove(descriptor);
             }
 
-            // String de conexão corrigida para SQLite em memória compartilhada
             _connection = new SqliteConnection("DataSource=:memory:;Cache=Shared");
             _connection.Open();
 
@@ -68,10 +68,9 @@ public class ApiTests : IClassFixture<CustomWebApplicationFactory>
         var response = await _client.GetAsync("/health");
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
-        var json = await response.Content.ReadFromJsonAsync<Dictionary<string, string>>();
-        Assert.NotNull(json);
-        Assert.True(json.ContainsKey("status"));
-        Assert.True(json.ContainsKey("database"));
+        var json = await response.Content.ReadFromJsonAsync<JsonElement>();
+        Assert.True(json.TryGetProperty("status", out var _));
+        Assert.True(json.TryGetProperty("database", out var _));
     }
 
     [Fact]
